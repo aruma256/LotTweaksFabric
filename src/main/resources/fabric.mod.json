@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "lottweaks",
+  "version": "${version}",
+
+  "name": "LotTweaks",
+  "description": "LotTweaks adds tweaks for builders to increase productivity in Creative mode.",
+  "authors": [
+    "LOTqwerty",
+    "Aruma256"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/lottweaks"
+  },
+
+  "license": "",
+  "icon": "assets/lottweaks/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.github.lotqwerty.lottweaks.LotTweaks"
+    ],
+    "client": [
+      "com.github.lotqwerty.lottweaks.client.LotTweaksClient"
+    ]
+  },
+  "mixins": [
+    "lottweaks.client.mixins.json"
+  ],
+
+	"depends": {
+		"fabricloader": ">=0.14.21",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+  "suggests": {
+    "another-mod": "*"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/sEvqhB86mM"
+      }
+    }
+  }
+}
