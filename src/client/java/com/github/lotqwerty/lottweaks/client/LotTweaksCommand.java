@@ -7,6 +7,8 @@ import com.github.lotqwerty.lottweaks.client.RotationHelper.Group;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,7 +18,6 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
@@ -55,7 +56,7 @@ public class LotTweaksCommand implements ClientCommandRegistrationCallback {
 		return ClientCommandManager.literal(string);
 	}
 
-	private void executeAdd(Group group) throws CommandRuntimeException {
+	private void executeAdd(Group group) throws LotTweaksCommandRuntimeException {
 		Minecraft mc = Minecraft.getInstance();
 		StringJoiner stringJoiner = new StringJoiner(",");
 		int count = 0;
@@ -66,18 +67,18 @@ public class LotTweaksCommand implements ClientCommandRegistrationCallback {
 			}
 			Item item = itemStack.getItem();
 			if (item == Items.AIR) {
-				throw new CommandRuntimeException(Component.literal(String.format("Failed to get item instance. (%d)", i + 1)));
+				throw new LotTweaksCommandRuntimeException(String.format("Failed to get item instance. (%d)", i + 1));
 			}
 			String name = BuiltInRegistries.ITEM.getKey(item).toString();
 			if (RotationHelper.canRotate(itemStack, group)) {
-				throw new CommandRuntimeException(Component.literal(String.format("'%s' already exists (slot %d)", name, i + 1)));
+				throw new LotTweaksCommandRuntimeException(String.format("'%s' already exists (slot %d)", name, i + 1));
 			}
 			stringJoiner.add(name);
 			count++;
 		}
 		String line = stringJoiner.toString();
 		if (line.isEmpty()) {
-			throw new CommandRuntimeException(Component.literal(String.format("Hotbar is empty.")));
+			throw new LotTweaksCommandRuntimeException(String.format("Hotbar is empty."));
 		}
 		LotTweaks.LOGGER.debug("adding a new block/item-group from /lottweaks command");
 		LotTweaks.LOGGER.debug(line);
@@ -89,18 +90,23 @@ public class LotTweaksCommand implements ClientCommandRegistrationCallback {
 		}
 	}
 
-	private void executeReload() throws CommandRuntimeException {
+	private void executeReload() throws LotTweaksCommandRuntimeException {
 		try {
 			boolean f;
 			f = RotationHelper.loadAllFromFile();
-			if (!f) throw new CommandRuntimeException(Component.literal("LotTweaks: failed to reload config file"));
+			if (!f) throw new LotTweaksCommandRuntimeException("LotTweaks: failed to reload config file");
 			f = RotationHelper.loadAllItemGroupFromStrArray();
-			if (!f) throw new CommandRuntimeException(Component.literal("LotTweaks: failed to reload blocks"));
+			if (!f) throw new LotTweaksCommandRuntimeException("LotTweaks: failed to reload blocks");
 			displayMessage(Component.literal("LotTweaks: reload succeeded!"));
-		} catch (CommandRuntimeException e) {
+		} catch (LotTweaksCommandRuntimeException e) {
 			displayMessage(Component.literal(ChatFormatting.RED + e.getMessage()));
 		}
 		LotTweaksClient.showErrorLogToChat();
 	}
 
+	private static final class LotTweaksCommandRuntimeException extends RuntimeException {
+		public LotTweaksCommandRuntimeException(String message) {
+	        super(message);
+	    }
+	}
 }
