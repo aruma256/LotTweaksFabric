@@ -16,7 +16,7 @@ public class LotTweaks implements ModInitializer {
 	public static final String MODID = "lottweaks";
 	public static final String NAME = "LotTweaks";
 	public static final String VERSION = "2.3.4";
-	public static Logger LOGGER = LogManager.getLogger();
+	public static Logger LOGGER = LogManager.getLogger(MODID);
 
 	public static class CONFIG {
 		public static int MAX_RANGE = 128;
