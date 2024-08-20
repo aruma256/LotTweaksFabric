@@ -308,7 +308,7 @@ public class RotationHelper {
 				}
 				List<Item> items = new ArrayList<>();
 				for (String itemStr: line.split(",")) {
-					ResourceLocation resourceLocation = new ResourceLocation(itemStr);
+					ResourceLocation resourceLocation = ResourceLocation.parse(itemStr);
 					Item item = BuiltInRegistries.ITEM.get(resourceLocation);
 					if (item == null || item == Items.AIR) {
 						warnGroupConfigErrors(String.format("'%s' is not supported.", itemStr), lineCount, group);
