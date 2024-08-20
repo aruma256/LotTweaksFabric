@@ -97,7 +97,7 @@ public class ExPickKey extends ItemSelectKeyBase implements ScrollListener, Rend
 
 	private void normalModePick() {
 		Minecraft mc = Minecraft.getInstance();
-		HitResult rayTraceResult = mc.getCameraEntity().pick(255.0, mc.getFrameTime(), false);
+		HitResult rayTraceResult = mc.getCameraEntity().pick(255.0, getPartialTick(), false);
 		if (rayTraceResult == null) {
 			return;
 		}

@@ -38,7 +38,7 @@ public class AdjustRangeKey extends LTKeyBase implements RenderHotbarListener {
 		}
 		// Update dist
 		Minecraft mc = Minecraft.getInstance();
-		HitResult rayTraceResult = mc.getCameraEntity().pick(255.0, mc.getFrameTime(), false);
+		HitResult rayTraceResult = mc.getCameraEntity().pick(255.0, getPartialTick(), false);
 		double dist;
 		if (rayTraceResult == null || rayTraceResult.getType() == HitResult.Type.MISS) {
 			dist = LotTweaks.CONFIG.MAX_RANGE;
