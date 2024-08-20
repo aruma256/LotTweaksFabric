@@ -39,7 +39,7 @@ public class SelectionBoxRenderer {
 
 	//from LevelRenderer.class
 	private static void renderShape(PoseStack matrixStackIn, VertexConsumer bufferIn, VoxelShape shapeIn, double xIn, double yIn, double zIn, float red, float green, float blue, float alpha) {
-		PoseStack.Pose posestack$pose = matrixStackIn.last();
+		PoseStack.Pose pose = matrixStackIn.last();
 		shapeIn.forAllEdges((ax, ay, az, bx, by, bz) -> {
 			float x = (float)(bx - ax);
 			float y = (float)(by - ay);
@@ -48,8 +48,8 @@ public class SelectionBoxRenderer {
 			x = x / d;
 			y = y / d;
 			z = z / d;
-			bufferIn.vertex(posestack$pose.pose(), (float)(ax + xIn), (float)(ay + yIn), (float)(az + zIn)).color(red, green, blue, alpha).normal(posestack$pose.normal(), x, y, z).endVertex();
-			bufferIn.vertex(posestack$pose.pose(), (float)(bx + xIn), (float)(by + yIn), (float)(bz + zIn)).color(red, green, blue, alpha).normal(posestack$pose.normal(), x, y, z).endVertex();
+			bufferIn.addVertex(pose, (float)(ax + xIn), (float)(ay + yIn), (float)(az + zIn)).setColor(red, green, blue, alpha).setNormal(pose, x, y, z);
+			bufferIn.addVertex(pose, (float)(bx + xIn), (float)(by + yIn), (float)(bz + zIn)).setColor(red, green, blue, alpha).setNormal(pose, x, y, z);
 		});
 	}
 
