@@ -4,13 +4,21 @@ import java.nio.charset.StandardCharsets;
 
 import com.github.lotqwerty.lottweaks.AdjustRangeHelper;
 import com.github.lotqwerty.lottweaks.LotTweaks;
+import com.github.lotqwerty.lottweaks.network.LTPacketHandler.AdjustRangeMessage;
+import com.github.lotqwerty.lottweaks.network.LTPacketHandler.HelloMessage;
+import com.github.lotqwerty.lottweaks.network.LTPacketHandler.ReplaceMessage;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.Context;
+import net.fabricmc.fabric.mixin.networking.PacketCodecDispatcherMixin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.StreamEncoder;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -21,33 +29,32 @@ import net.minecraft.world.phys.Vec3;
 
 public class LTPacketHandler {
 
-	protected static final ResourceLocation REPLACE_PACKET_ID = new ResourceLocation(LotTweaks.MODID, "replace_packet");
-	protected static final ResourceLocation ADJUSTRANGE_PACKET_ID = new ResourceLocation(LotTweaks.MODID, "adjustrange_packet");
-	protected static final ResourceLocation HELLO_PACKET_ID = new ResourceLocation(LotTweaks.MODID, "hello_packet");
-
 	public static void init() {
-		ServerPlayNetworking.registerGlobalReceiver(REPLACE_PACKET_ID, (server, player, handler, buf, responseSender) -> {new ReplaceMessage(buf).handle(server, player);});
-		ServerPlayNetworking.registerGlobalReceiver(ADJUSTRANGE_PACKET_ID, (server, player, handler, buf, responseSender) -> {new AdjustRangeMessage(buf).handle(server, player);});
+		PayloadTypeRegistry.playC2S().register(ReplaceMessage.TYPE, ReplaceMessage.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(ReplaceMessage.TYPE, (payload, context) -> { payload.handle(context); });
+		PayloadTypeRegistry.playC2S().register(AdjustRangeMessage.TYPE, AdjustRangeMessage.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(AdjustRangeMessage.TYPE, (payload, context) -> { payload.handle(context); });
+		PayloadTypeRegistry.playS2C().register(HelloMessage.TYPE, HelloMessage.CODEC);
 	}
 
 	public static void sendHelloMessage(ServerPlayer player) {
 		FriendlyByteBuf buf = PacketByteBufs.create();
 		new HelloMessage(LotTweaks.VERSION).toBytes(buf);
-		ServerPlayNetworking.send(player, HELLO_PACKET_ID, buf);
+		ServerPlayNetworking.send(player, new HelloMessage(LotTweaks.VERSION));
 	}
 
 	//Replace
 
-	public static class ReplaceMessage {
+	public record ReplaceMessage(BlockPos pos, BlockState state, BlockState checkState) implements CustomPacketPayload {
+		public static final CustomPacketPayload.Type<ReplaceMessage> TYPE = new CustomPacketPayload.Type<ReplaceMessage>(ResourceLocation.fromNamespaceAndPath("lottweaks", "replace"));
+		public static final StreamCodec<FriendlyByteBuf, ReplaceMessage> CODEC = StreamCodec.of(
+			(buf, packet) -> packet.toBytes(buf),
+			buf -> new ReplaceMessage(buf)
+		);
 
-		private final BlockPos pos;
-		private final BlockState state;
-		private final BlockState checkState;
-
-		public ReplaceMessage(BlockPos pos, BlockState state, BlockState checkState) {
-			this.pos = pos;
-			this.state = state;
-			this.checkState = checkState;
+		@Override
+		public Type<ReplaceMessage> type() {
+			return TYPE;
 		}
 
 		public ReplaceMessage(FriendlyByteBuf buf) {
@@ -61,11 +68,12 @@ public class LTPacketHandler {
 		}
 
 		@SuppressWarnings("resource")
-		public void handle(MinecraftServer server, ServerPlayer player) {
+		public void handle(Context context) {
 			/*
 			ctx.get().setPacketHandled(true);
 			final ServerPlayer player = ctx.get().getSender();
 			*/
+			final ServerPlayer player = context.player();
 			if (!player.isCreative()) {
 				return;
 			}
@@ -88,7 +96,7 @@ public class LTPacketHandler {
 				return;
 			}
 			//
-			server.execute(() -> {
+			context.server().execute(() -> {
 				player.serverLevel().setBlock(pos, state, 2);
 			});
 			return;
@@ -98,9 +106,17 @@ public class LTPacketHandler {
 
 	// AdjustRange
 
-	public static class AdjustRangeMessage {
+	public record AdjustRangeMessage(double dist) implements CustomPacketPayload {
+		public static final CustomPacketPayload.Type<AdjustRangeMessage> TYPE = new CustomPacketPayload.Type<AdjustRangeMessage>(ResourceLocation.fromNamespaceAndPath("lottweaks", "adjust_range"));
+		public static final StreamCodec<FriendlyByteBuf, AdjustRangeMessage> CODEC = StreamCodec.of(
+			(buf, packet) -> packet.toBytes(buf),
+			buf -> new AdjustRangeMessage(buf)
+		);
 
-		private double dist;
+		@Override
+		public Type<AdjustRangeMessage> type() {
+			return TYPE;
+		}
 
 		public AdjustRangeMessage(double dist) {
 			this.dist = dist;
@@ -114,20 +130,21 @@ public class LTPacketHandler {
 			buf.writeDouble(this.dist);
 		}
 
-		public void handle(MinecraftServer server, ServerPlayer player) {
+		public void handle(Context context) {
 			/*
 			ctx.get().setPacketHandled(true);
 			final ServerPlayer player = ctx.get().getSender();
 			*/
+			final ServerPlayer player = context.player();
 			if (!player.isCreative()) {
 				return;
 			}
-			server.execute(() -> {
+			context.server().execute(() -> {
 				if (dist < 0) {
 					return;
 				}
-				dist = Math.min(LotTweaks.CONFIG.MAX_RANGE, dist);
-				AdjustRangeHelper.changeRangeModifier(player, dist);
+				double clipped_dist = Math.min(LotTweaks.CONFIG.MAX_RANGE, dist);
+				AdjustRangeHelper.changeRangeModifier(player, clipped_dist);
 			});
 			return;
 		}
@@ -135,32 +152,30 @@ public class LTPacketHandler {
 
 	// Hello
 
-	public static class HelloMessage {
+	public record HelloMessage(String version) implements CustomPacketPayload {
+		public static final CustomPacketPayload.Type<HelloMessage> TYPE = new CustomPacketPayload.Type<HelloMessage>(ResourceLocation.fromNamespaceAndPath("lottweaks", "hello"));
+		public static final StreamCodec<FriendlyByteBuf, HelloMessage> CODEC = StreamCodec.of(
+			(buf, packet) -> packet.toBytes(buf),
+			buf -> new HelloMessage(buf)
+		);
 
-		protected String version;
+		@Override
+		public Type<HelloMessage> type() {
+			return TYPE;
+		}
 
 		public HelloMessage(String version) {
 			this.version = version;
 		}
 
 		public HelloMessage(FriendlyByteBuf buf) {
-			this.version = buf.readCharSequence(buf.readInt(), StandardCharsets.UTF_8).toString();
+			this(buf.readCharSequence(buf.readInt(), StandardCharsets.UTF_8).toString());
 		}
 
 		public void toBytes(FriendlyByteBuf buf) {
 			buf.writeInt(version.length());
 			buf.writeCharSequence(version, StandardCharsets.UTF_8);
 		}
-
-		public void handle() {
-			/*
-			ctx.get().setPacketHandled(true);
-			*/
-			/*
-			LotTweaksClient.setServerVersion(this.version);
-			*/
-		}
-
 	}
 
 }
