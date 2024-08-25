@@ -86,13 +86,18 @@ public class ExPickKey extends ItemSelectKeyBase implements ScrollListener, Rend
 		Minecraft mc = Minecraft.getInstance();
 		final HitResult tmpHitResult = mc.hitResult;
 		mc.hitResult = rayTraceResult;
-		final int tmpSlot = mc.player.getInventory().selected;
-		final ItemStack tmpStack = mc.player.getInventory().getSelected();
-		//
 		((VanillaPickInvoker)mc).lottweaks_invokeVanillaItemPick();
-		//
 		mc.hitResult = tmpHitResult;
-		return (tmpSlot != mc.player.getInventory().selected) || (tmpStack != mc.player.getInventory().getSelected());
+
+		if (rayTraceResult == null || rayTraceResult.getType() != HitResult.Type.BLOCK) {
+			return false;
+		}
+		BlockPos blockPos = ((BlockHitResult)rayTraceResult).getBlockPos();
+		BlockState blockState = mc.level.getBlockState(blockPos);
+		if (blockState.isAir()) {
+			return false;
+		}
+		return !blockState.getBlock().getCloneItemStack(mc.level, blockPos, blockState).isEmpty();
 	}
 
 	private void normalModePick() {
