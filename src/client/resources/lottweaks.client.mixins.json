@@ -1,17 +1,12 @@
 {
   "required": true,
-  "minVersion": "0.8",
   "package": "com.github.lotqwerty.lottweaks.fabric.mixin",
 	"compatibilityLevel": "JAVA_21",
-  "mixins": [
-  ],
   "client": [
     "MouseScrollRedirector",
     "HotbarRendererHook",
     "VanillaPickInvoker",
     "DrawShapeOutlineInjector"
-  ],
-  "server": [
   ],
   "injectors": {
     "defaultRequire": 1
