@@ -3,7 +3,6 @@ package com.github.lotqwerty.lottweaks.client.renderer;
 import java.util.Collection;
 
 import com.github.lotqwerty.lottweaks.LotTweaks;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,13 +18,11 @@ public final class LTRenderer {
 		if (stacks.isEmpty()) {
 			return;
 		}
-		glInitialize();
 		if (renderMode == RenderMode.CIRCLE) {
 			circular(guiGraphics, stacks, x, y, t, pt, lt, direction);
 		} else {
 			linear(guiGraphics, stacks, x, y, t, pt, lt, direction);
 		}
-		glFinalize();
 	}
 
 	public enum RenderMode {
@@ -64,15 +61,6 @@ public final class LTRenderer {
 
 	private static void renderAndDecorateItem(GuiGraphics guiGraphics, ItemStack itemStack, int x, int y) {
 		guiGraphics.renderItem(itemStack, x, y);
-	}
-
-	private static void glInitialize() {
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-	}
-	
-	private static void glFinalize() {
-        RenderSystem.disableBlend();
 	}
 	
 }
