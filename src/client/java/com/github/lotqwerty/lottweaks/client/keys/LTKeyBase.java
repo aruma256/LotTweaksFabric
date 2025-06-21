@@ -49,6 +49,6 @@ public class LTKeyBase extends KeyMapping implements ClientTickEvents.EndTick {
 	}
 
 	protected static float getPartialTick() {
-		return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+		return Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
 	}
 }

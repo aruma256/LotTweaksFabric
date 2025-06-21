@@ -97,7 +97,7 @@ public class ExPickKey extends ItemSelectKeyBase implements ScrollListener, Rend
 		if (blockState.isAir()) {
 			return false;
 		}
-		return !blockState.getBlock().getCloneItemStack(mc.level, blockPos, blockState).isEmpty();
+		return !blockState.getCloneItemStack(mc.level, blockPos, true).isEmpty();
 	}
 
 	private void normalModePick() {
@@ -110,7 +110,7 @@ public class ExPickKey extends ItemSelectKeyBase implements ScrollListener, Rend
 		if (!succeeded) {
 			return;
 		}
-		ItemStack itemStack = mc.player.getInventory().getSelected();
+		ItemStack itemStack = mc.player.getInventory().getSelectedItem();
 		if (itemStack.isEmpty()) {
 			return;
 		}
@@ -119,7 +119,7 @@ public class ExPickKey extends ItemSelectKeyBase implements ScrollListener, Rend
 		for (BlockPos posDiff : SEARCH_POS) {
 			try {
 				BlockState state = mc.level.getBlockState(pos.offset(posDiff));
-				itemStack = state.getBlock().getCloneItemStack(mc.level, pos, state);
+				itemStack = state.getCloneItemStack(mc.level, pos, true);
 				if (!itemStack.isEmpty()) {
 					addToCandidatesWithDedup(itemStack);
 				}
@@ -131,7 +131,7 @@ public class ExPickKey extends ItemSelectKeyBase implements ScrollListener, Rend
 	private void historyModePick() {
 		if (!breakHistory.isEmpty()) {
 			candidates.addAll(breakHistory);
-			candidates.addFirst(Minecraft.getInstance().player.getInventory().getSelected());
+			candidates.addFirst(Minecraft.getInstance().player.getInventory().getSelectedItem());
 			isHistoryMode = true;
 		}
 	}
@@ -186,7 +186,7 @@ public class ExPickKey extends ItemSelectKeyBase implements ScrollListener, Rend
 			int y = Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2 - 8;
 			LTRenderer.renderItemStacks(event.getGuiGraphics(), candidates, x, y, pressTime, partialTicks, lastRotateTime, rotateDirection);
 		} else {
-			int x = Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2 - 90 + Minecraft.getInstance().player.getInventory().selected * 20 + 2;
+			int x = Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2 - 90 + Minecraft.getInstance().player.getInventory().getSelectedSlot() * 20 + 2;
 			int y = Minecraft.getInstance().getWindow().getGuiScaledHeight() - 16 - 3;
 			LTRenderer.renderItemStacks(event.getGuiGraphics(), candidates, x, y, pressTime, partialTicks, lastRotateTime, rotateDirection, LTRenderer.RenderMode.LINE);
 		}
@@ -228,7 +228,7 @@ public class ExPickKey extends ItemSelectKeyBase implements ScrollListener, Rend
 		//
 		Minecraft mc = Minecraft.getInstance();
 		BlockState blockState = event.getWorld().getBlockState(event.getPos());
-		ItemStack itemStack = blockState.getBlock().getCloneItemStack(event.getWorld(), event.getPos(), blockState);
+		ItemStack itemStack = blockState.getCloneItemStack(event.getWorld(), event.getPos(), true);
 		addToHistory(itemStack);
 	}
 

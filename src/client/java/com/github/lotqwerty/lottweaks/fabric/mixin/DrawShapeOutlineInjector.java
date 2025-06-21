@@ -18,8 +18,8 @@ import net.minecraft.world.level.block.state.BlockState;
 @Mixin(LevelRenderer.class)
 public abstract class DrawShapeOutlineInjector {
 
-	@Inject(method="renderHitOutline(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/entity/Entity;DDDLnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V", at=@At(value="HEAD"), cancellable=true)
-	private void lottweaks_injected_renderHitOutline(PoseStack matrixStack, VertexConsumer vertexConsumer, Entity entity, double d, double e, double f, BlockPos blockPos, BlockState blockState, CallbackInfo ci) {
+	@Inject(method="renderHitOutline(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/entity/Entity;DDDLnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)V", at=@At(value="HEAD"), cancellable=true)
+	private void lottweaks_injected_renderHitOutline(PoseStack matrixStack, VertexConsumer vertexConsumer, Entity entity, double d, double e, double f, BlockPos blockPos, BlockState blockState, int i, CallbackInfo ci) {
 		if (DrawBlockOutlineEvent.post(Minecraft.getInstance().gameRenderer.getMainCamera(), matrixStack, vertexConsumer, blockPos)) {
 			ci.cancel();
 		}

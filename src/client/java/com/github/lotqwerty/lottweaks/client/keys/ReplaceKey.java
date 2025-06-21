@@ -105,7 +105,7 @@ public class ReplaceKey extends LTKeyBase implements RenderHotbarListener, DrawB
 		if (lockedBlockState != null && lockedBlockState != state) {
 			return;
 		}
-		ItemStack itemStack = mc.player.getInventory().getSelected();
+		ItemStack itemStack = mc.player.getInventory().getSelectedItem();
 		Block block = Block.byItem(itemStack.getItem());
 		if (itemStack.isEmpty() || block == Blocks.AIR) {
 			return;
@@ -113,7 +113,7 @@ public class ReplaceKey extends LTKeyBase implements RenderHotbarListener, DrawB
 		BlockState newBlockState = block.getStateForPlacement(new BlockPlaceContext(mc.player, InteractionHand.MAIN_HAND, itemStack, (BlockHitResult)target));
 		LTPacketHandlerClient.sendReplaceMessage(pos, newBlockState, state);
 		// add to history
-		ExPickKey.addToHistory(state.getBlock().getCloneItemStack(mc.level, pos, state));
+		ExPickKey.addToHistory(state.getCloneItemStack(mc.level, pos, true));
 	}
 
 }

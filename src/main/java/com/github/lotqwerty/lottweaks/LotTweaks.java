@@ -1,7 +1,7 @@
 package com.github.lotqwerty.lottweaks;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.lotqwerty.lottweaks.network.LTPacketHandler;
 import com.github.lotqwerty.lottweaks.network.ServerConnectionListener;
@@ -16,7 +16,7 @@ public class LotTweaks implements ModInitializer {
 	public static final String MODID = "lottweaks";
 	public static final String NAME = "LotTweaks";
 	public static final String VERSION = "2.3.4";
-	public static Logger LOGGER = LogManager.getLogger(MODID);
+	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 
 	public static class CONFIG {
 		public static int MAX_RANGE = 128;

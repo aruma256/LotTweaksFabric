@@ -43,8 +43,8 @@ public class ItemSelectKeyBase extends LTKeyBase {
 
 	protected void updateCurrentItemStack(ItemStack itemStack) {
 		Minecraft mc = Minecraft.getInstance();
-		mc.player.getInventory().setItem(mc.player.getInventory().selected, itemStack);
-        mc.gameMode.handleCreativeModeItemAdd(mc.player.getItemInHand(InteractionHand.MAIN_HAND), 36 + mc.player.getInventory().selected);
+		mc.player.getInventory().setItem(mc.player.getInventory().getSelectedSlot(), itemStack);
+        mc.gameMode.handleCreativeModeItemAdd(mc.player.getItemInHand(InteractionHand.MAIN_HAND), 36 + mc.player.getInventory().getSelectedSlot());
 	}
 
 	@Override
