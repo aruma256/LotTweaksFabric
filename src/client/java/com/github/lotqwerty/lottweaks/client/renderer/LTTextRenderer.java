@@ -3,6 +3,7 @@ package com.github.lotqwerty.lottweaks.client.renderer;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.ARGB;
 
 public class LTTextRenderer {
 
@@ -22,7 +23,7 @@ public class LTTextRenderer {
 		Minecraft mc = Minecraft.getInstance();
 		int x = (scaledResolution.getGuiScaledWidth() - mc.font.width(msg)) / 2;
 		int y = scaledResolution.getGuiScaledHeight() - 70;
-		guiGraphics.drawString(mc.font, msg, x, y, color);
+		guiGraphics.drawString(mc.font, msg, x, y, ARGB.opaque(color));
 	}
 
 }

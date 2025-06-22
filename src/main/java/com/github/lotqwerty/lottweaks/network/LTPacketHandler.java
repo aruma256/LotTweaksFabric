@@ -77,7 +77,7 @@ public class LTPacketHandler {
 			if (!player.isCreative()) {
 				return;
 			}
-			if (player.serverLevel().isClientSide) {
+			if (player.level().isClientSide) {
 				// kore iru ??
 				return;
 			}
@@ -92,12 +92,12 @@ public class LTPacketHandler {
 			if (dist > LotTweaks.CONFIG.MAX_RANGE) {
 				return;
 			}
-			if (player.serverLevel().getBlockState(pos) != checkState) {
+			if (player.level().getBlockState(pos) != checkState) {
 				return;
 			}
 			//
 			context.server().execute(() -> {
-				player.serverLevel().setBlock(pos, state, 2);
+				player.level().setBlock(pos, state, 2);
 			});
 			return;
 		}
